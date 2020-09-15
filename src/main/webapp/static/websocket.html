@@ -267,19 +267,22 @@
      * 点赞
      */
     $("#giveLike").click(function(){
-        if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
-            alert("没有连接房间")
-            return
+      if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+        alert("没有连接房间")
+        return
+      }
+      var msg = $("#msg").val()
+      if(msg.trim()){
+        auth_params.type = 170;
+        var roomid = $("#roomidin").val()
+        auth_params.taskId = roomid
+        auth_params.liveId = roomid;
+        auth_params.data.content = msg;
+        var dataString = JSON.stringify(auth_params);
+        socket.send(dataString)
+        for(var i = 0 ; i < 5 ; i ++){
+
         }
-        var msg = $("#msg").val()
-        if(msg.trim()){
-
-            auth_params.cmd = 'GIVELIKE';
-            var roomid = $("#roomidin").val()
-            auth_params.liveId = roomid
-
-            var dataString = JSON.stringify(auth_params);
-            socket.send(dataString)
 
         }else{
             alert("请输入信息")
