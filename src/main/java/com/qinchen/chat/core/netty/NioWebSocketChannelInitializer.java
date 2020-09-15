@@ -25,7 +25,7 @@ public class NioWebSocketChannelInitializer extends ChannelInitializer<SocketCha
         pipeline.addLast("chunk",new ChunkedWriteHandler());
         pipeline.addLast(new HttpObjectAggregator(8192));
         pipeline.addLast(new WebSocketServerProtocolHandler("/webSocket"));
-        pipeline.addLast(new IdleStateHandler(6000,12000,18000,TimeUnit.SECONDS));
+        pipeline.addLast(new IdleStateHandler(60,120,180,TimeUnit.SECONDS));
         pipeline.addLast(new MyNioWebSocketHandler()); //自定义的业务handler
         ch.pipeline().addLast(new ExceptionCaughtHandler());
 
