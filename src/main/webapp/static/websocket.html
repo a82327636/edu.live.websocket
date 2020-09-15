@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+
+        body{
+            background-color: black;
+            color: white;
+        }
+
+        div{
+            margin-bottom: 10px;
+        }
+
+        table {
+            border-collapse: collapse;
+            align:center;
+        }
+
+
+        tr {
+            display: block; /*将tr设置为块体元素*/
+        }
+
+        td {
+            width: 90px;
+            padding: 5px;
+            border: 1px solid green;
+            text-align: center;
+        }
+
+        .table-head{padding-right:17px;background-color:#999;color:#000;}
+        .table-body{width:100%; height:500px;overflow-y:scroll;}
+        .table-head table,.table-body table{width:100%;}
+        /*.table-body table tr:nth-child(2n+1){background-color:#f2f2f2;}*/
+
+        .table-body tbody tr:nth-child(even) td{
+
+            width:1499px;
+            text-align: left;
+            padding-left: 10px;
+        }
+
+        tbody tr:nth-child(even) td span{
+            color: red;
+        }
+
+        tbody tr:nth-child(4n+1),tbody tr:nth-child(4n+2){
+            background-color: #c1dac1;
+            color:black;
+        }
+    </style>
+
+</head>
+<body>
+<div >
+    开房 : <input type="text" id="roomid">
+    <input type="button" value="开房" id="open">
+    <input type="button" value="解散" id="close">
+</div>
+
+<div>
+    进房 : <input type="text" id="roomidin">
+    <input type="button" value="进房" id="add">
+    <input type="button" value="退出" id="quit">
+</div>
+
+<div id="sidInput">
+    <h3> </h3>
+     发言 : <input type="text" id="msg">
+    <input type="button" value="发言" id="sendMsg">
+    <input type="button" value="点赞" id="giveLike">
+</div>
+
+踢人 : <input type="text" id="chid">
+<input type="button" value="踢人" id="reject">
+
+查询 : <input type="text" id="query">
+<input type="button" value="查询" id="query11">
+
+设置弹幕 : <input type="text" id="sheding">
+<input type="button" value="查询" id="sheding11">
+<div>
+
+讲解商品 : <input type="text" id="jianjie">
+<input type="button" value="查询" id="jianjie11"></div>
+
+<!--<div id="finalRet"></div>-->
+</body>
+
+<script type="text/javascript" src="../static/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../static/webSocketUtil1.js"></script>
+
+
+<script type="text/javascript">
+    console.log(document.documentElement.clientHeight)
+    $("#a").height((document.documentElement.clientHeight-$("#b").height()-$('#sidInput').height()-20)+"px");
+
+    var auth_params = {
+            data:{
+                'userId': 8,
+                'headUrl':'http://www.baidu.com',
+                'nickName':'发靥的王善良',
+                'context':'你好啊啊啊啊'
+            }
+        };
+    var socket ;
+
+    function wsCallback(msg) {
+        console.info(msg.data)
+    }
+
+    /**
+     * 开房间
+     */
+    $("#open").click(function(){
+        var roomid = $("#roomid").val()
+        if(roomid.trim()){
+            auth_params.type = 100
+            auth_params.taskId = roomid
+            auth_params.liveId = roomid
+            socket = webSocket( "sellerActProblem",wsCallback,auth_params)
+        }else{
+            alert("请输入房间号")
+        }
+    })
+
+    /**
+     * 用户加入房间
+     */
+    $("#add").click(function(){
+      var roomid = $("#roomidin").val()
+      if(roomid.trim()){
+
+        auth_params.type = 110;
+        auth_params.taskId = roomid;
+        auth_params.liveId = roomid;
+        socket = webSocket( "sellerActProblem",wsCallback,auth_params)
+
+      }else{
+        alert("请输入房间号")
+      }
+    })
+
+    /**
+     * 发送消息
+     */
+    $("#sendMsg").click(function(){
+      if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+        alert("没有连接房间")
+        return
+      }
+      var msg = $("#msg").val()
+      if(msg.trim()){
+        auth_params.type = 130;
+        var roomid = $("#roomidin").val()
+        auth_params.taskId = roomid
+        auth_params.liveId = roomid;
+        auth_params.data.content = msg;
+        var dataString = JSON.stringify(auth_params);
+        socket.send(dataString)
+        for(var i = 0 ; i < 5 ; i ++){
+
+        }
+
+      }else{
+        alert("请输入信息")
+      }
+    })
+
+    /**
+     * 关闭房间
+     */
+    $("#close").click(function(){
+        if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+            alert("没有连接房间")
+            return
+        }
+        var roomid = $("#roomid").val()
+        if(roomid.trim()){
+            auth_params.type = 140
+            auth_params.taskId = roomid;
+          auth_params.liveId = roomid;
+            var dataString = JSON.stringify(auth_params);
+            socket.send(dataString)
+        }else{
+            alert("请输入房间号")
+        }
+    })
+
+
+    /**
+     * 退出房间
+     */
+    $("#quit").click(function(){
+        if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+            alert("没有连接房间")
+            return
+        }
+        var roomid = $("#roomidin").val()
+        if(roomid.trim()){
+            auth_params.type = 150;
+            auth_params.taskId = roomid;
+            auth_params.liveId = roomid;
+            var dataString = JSON.stringify(auth_params);
+            socket.send(dataString)
+
+        }else{
+            alert("请输入房间号")
+        }
+    })
+
+
+ $("#query11").click(function(){
+        var roomid = $("#roomidin").val()
+        if(roomid.trim()){
+            auth_params.type = '2200';
+            auth_params.taskId = roomid;
+            auth_params.liveId = roomid;
+            socket = webSocket( "sellerActProblem",wsCallback,auth_params)
+
+        }else{
+            alert("请输入房间号")
+        }
+    })
+
+    /**
+     * 设置弹幕
+     */
+     $("#sheding11").click(function(){
+        var roomid = $("#roomidin").val()
+        if(roomid.trim()){
+        	
+            auth_params.type = 'CHATLOOKPERMISS';
+            auth_params.liveId = roomid;
+            auth_params.status = '1';
+
+            socket = webSocket( "sellerActProblem",wsCallback,auth_params)
+
+        }else{
+            alert("请输入房间号")
+        }
+    })
+    /**
+     * 讲解
+     */
+     $("#jianjie11").click(function(){
+        var roomid = $("#roomidin").val()
+        if(roomid.trim()){
+        	
+            auth_params.cmd = 'LIVEGOODEXPLAIN';
+            auth_params.liveId = roomid;
+            auth_params.status = '1';
+            auth_params.liveGoodsId = 3;
+            
+            socket = webSocket( "sellerActProblem",wsCallback,auth_params)
+
+        }else{
+            alert("请输入房间号")
+        }
+    })
+
+
+    /**
+     * 点赞
+     */
+    $("#giveLike").click(function(){
+        if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+            alert("没有连接房间")
+            return
+        }
+        var msg = $("#msg").val()
+        if(msg.trim()){
+
+            auth_params.cmd = 'GIVELIKE';
+            var roomid = $("#roomidin").val()
+            auth_params.liveId = roomid
+
+            var dataString = JSON.stringify(auth_params);
+            socket.send(dataString)
+
+        }else{
+            alert("请输入信息")
+        }
+    })
+
+
+    /**
+     * 踢人
+     */
+    $("#reject").click(function(){
+        if( "undefined" == typeof(socket) || null == socket || socket.readyState === socket.CLOSED){
+            alert("没有连接房间")
+            return
+        }
+        var chid = $("#chid").val()
+        if(chid.trim()){
+            var roomid = $("#roomid").val()
+            auth_params.cmd = 'EXPEL';
+            auth_params.liveId = roomid
+            auth_params.chid = chid
+            var dataString = JSON.stringify(auth_params);
+            socket.send(dataString)
+
+        }else{
+            alert("请输入成员id")
+        }
+    })
+
+ </script>
+</html>
