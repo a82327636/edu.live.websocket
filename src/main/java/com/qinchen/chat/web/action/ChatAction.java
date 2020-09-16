@@ -27,7 +27,7 @@ public class ChatAction {
     public ResultUtil getChatContentInfo(Long taskId){
         try {
             List<LiveChatLogVo> list = MyMapPoolUtil.totalContentMap.get(taskId);
-            if(list.size() > 0){
+            if(list != null && list.size() > 0){
                 MyMapPoolUtil.totalContentMap.remove(taskId);
                 return ResultUtil.success(list);
             }
@@ -69,7 +69,7 @@ public class ChatAction {
         try {
             Set set = MyMapPoolUtil.totalUserMap.get(taskId);
             ReportLiveVo vo = new ReportLiveVo();
-            if(set.size() > 0){
+            if(set != null && set.size() > 0){
                 //MyMapPoolUtil.totalUserMap.remove(taskId);
                 Integer totalChatNum = MyMapPoolUtil.totalChatMap.get(taskId);
                 vo.setTotalUserNum(set.size());
