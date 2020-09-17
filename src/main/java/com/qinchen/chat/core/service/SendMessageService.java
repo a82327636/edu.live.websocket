@@ -30,7 +30,6 @@ public class SendMessageService {
      * @return
      */
     public boolean sendMsg(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
-        logger.info("sendMsg111111");
         if(isExistChatGroup(socketMsg.getTaskId())){
             logger.info("sendMsg2222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);

@@ -36,7 +36,6 @@ public class UserLiveService {
      * @return
      */
     public boolean chatJoin(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
-        logger.info("chatJoin111111");
         UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatJoin222222");
@@ -114,7 +113,6 @@ public class UserLiveService {
      * @return
      */
     public boolean chatQuit(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
-        logger.info("chatQuit11111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatQuit22222");
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());

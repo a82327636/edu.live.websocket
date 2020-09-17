@@ -32,7 +32,6 @@ public class SellerLiveService {
      * @return
      */
     public Integer chatOpen(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg) {
-        logger.info("chatOpen111111");
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatOpen222222");
             MyMapPoolUtil.chatGroupMap.put(socketMsg.getTaskId(),new DefaultChannelGroup(GlobalEventExecutor.INSTANCE));
@@ -75,7 +74,6 @@ public class SellerLiveService {
      * @return
      */
     public boolean chatClose(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
-        logger.info("chatClose111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatClose222222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
@@ -102,7 +100,6 @@ public class SellerLiveService {
      * @return
      */
     public boolean leaveLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
-        logger.info("leaveLive111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("leaveLive222222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
@@ -129,7 +126,6 @@ public class SellerLiveService {
      * @return
      */
     public boolean againJoinLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
-        logger.info("againJoinLive111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("againJoinLive222222");
             if(!MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).contains(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()))){
