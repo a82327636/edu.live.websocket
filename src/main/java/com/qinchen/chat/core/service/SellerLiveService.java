@@ -6,19 +6,20 @@ import com.qinchen.chat.core.bean.SendMessageBean;
 import com.qinchen.chat.core.bean.SocketMessageBean;
 import com.qinchen.chat.common.util.MyMapPoolUtil;
 import com.qinchen.chat.core.bean.UserJoinMessageBean;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
 public class SellerLiveService {
+
+    private static final Logger logger = LoggerFactory.getLogger(SellerLiveService.class);
 
     @Autowired
     private SendMessageService sendMessageService;
@@ -31,7 +32,9 @@ public class SellerLiveService {
      * @return
      */
     public Integer chatOpen(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg) {
+        logger.info("chatOpen111111");
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("chatOpen222222");
             MyMapPoolUtil.chatGroupMap.put(socketMsg.getTaskId(),new DefaultChannelGroup(GlobalEventExecutor.INSTANCE));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
             MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
@@ -49,10 +52,17 @@ public class SellerLiveService {
             sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
-            SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
+            logger.info("chatOpen333333");
+            UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
             sendMessage.setType(socketMsg.getType());
+            if(!MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).contains(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()))){
+                sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+                MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
+                MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
+            }
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }
+        logger.info("chatOpen44444");
         return null;
     }
 
@@ -65,7 +75,9 @@ public class SellerLiveService {
      * @return
      */
     public boolean chatClose(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
+        logger.info("chatClose111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("chatClose222222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
@@ -78,6 +90,7 @@ public class SellerLiveService {
                 }
             },30, TimeUnit.SECONDS);
         }
+        logger.info("chatClose333333");
         return true;
     }
 
@@ -89,7 +102,9 @@ public class SellerLiveService {
      * @return
      */
     public boolean leaveLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
+        logger.info("leaveLive111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("leaveLive222222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             /*ChannelGroup channels = MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId());
@@ -102,6 +117,7 @@ public class SellerLiveService {
             }*/
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }
+        logger.info("leaveLive333333");
         return true;
     }
 
@@ -113,7 +129,13 @@ public class SellerLiveService {
      * @return
      */
     public boolean againJoinLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
+        logger.info("againJoinLive111111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("againJoinLive222222");
+            if(!MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).contains(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()))){
+                MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
+                MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
+            }
             UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
@@ -127,6 +149,7 @@ public class SellerLiveService {
             }*/
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }
+        logger.info("againJoinLive333333");
         return true;
     }
 

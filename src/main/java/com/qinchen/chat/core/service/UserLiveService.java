@@ -6,12 +6,13 @@ import com.qinchen.chat.common.util.*;
 import com.qinchen.chat.core.bean.ReportLiveUserDetailBean;
 import com.qinchen.chat.core.bean.SocketMessageBean;
 import com.qinchen.chat.core.bean.UserJoinMessageBean;
-import com.qinchen.chat.core.enums.RespMsgTypeEnum;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.EventExecutorGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.*;
@@ -20,6 +21,7 @@ import java.util.concurrent.Callable;
 @Service
 public class UserLiveService {
 
+    private static final Logger logger = LoggerFactory.getLogger(UserLiveService.class);
     @Autowired
     private JedisUtil jedisUtil;
     @Autowired
@@ -34,8 +36,10 @@ public class UserLiveService {
      * @return
      */
     public boolean chatJoin(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
+        logger.info("chatJoin111111");
         UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("chatJoin222222");
             if(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) == null){
                 List<Channel> channels = new ArrayList<>();
                 channels.add(ctx.channel());
@@ -97,6 +101,7 @@ public class UserLiveService {
                 return null;
             }
         });
+        logger.info("chatJoin33333");
         return true;
     }
 
@@ -109,7 +114,9 @@ public class UserLiveService {
      * @return
      */
     public boolean chatQuit(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
+        logger.info("chatQuit11111");
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("chatQuit22222");
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
             Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
             UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
@@ -148,6 +155,7 @@ public class UserLiveService {
                 }
             });
         }
+        logger.info("chatQuit333333");
         return true;
     }
 

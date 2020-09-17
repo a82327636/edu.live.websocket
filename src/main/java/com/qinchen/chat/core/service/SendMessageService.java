@@ -13,13 +13,15 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.util.concurrent.EventExecutorGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.Callable;
 
 @Service
 public class SendMessageService {
-
+    private static final Logger logger = LoggerFactory.getLogger(SendMessageService.class);
     /**
      * 用户/主播发消息
      * @param ctx
@@ -28,7 +30,9 @@ public class SendMessageService {
      * @return
      */
     public boolean sendMsg(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
+        logger.info("sendMsg111111");
         if(isExistChatGroup(socketMsg.getTaskId())){
+            logger.info("sendMsg2222");
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             // 给所有人发送消息
@@ -66,6 +70,7 @@ public class SendMessageService {
                 }
             });
         }
+        logger.info("sendMsg33333");
         return true;
     }
 
