@@ -100,6 +100,7 @@ public class SellerLiveService {
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
+            MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()));
             MyMapPoolUtil.liveChannelMap.remove(socketMsg.getTaskId());
             //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
