@@ -40,11 +40,6 @@ public class SellerLiveService {
             UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
             if(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) != null){
                 MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).addAll(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()));
-                /*List<Channel> channels = MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId());
-                sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
-                for(Channel channel:channels){
-                    sendMessageService.sendMessage(channel, ResultUtil.success(sendMessage));
-                }*/
                 MyMapPoolUtil.userChannelMap.remove(socketMsg.getTaskId());
             }
             sendMessage.setType(socketMsg.getType());
@@ -85,7 +80,7 @@ public class SellerLiveService {
                     MyMapPoolUtil.chatGroupMap.remove(socketMsg.getTaskId());
                     //MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel());
                 }
-            },30, TimeUnit.SECONDS);
+            },15, TimeUnit.SECONDS);
         }else {
             logger.info("chatClose2"+JSON.toJSONString(socketMsg));
         }
@@ -104,15 +99,9 @@ public class SellerLiveService {
             logger.info("leaveLive"+JSON.toJSONString(socketMsg));
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
-            /*ChannelGroup channels = MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId());
-            Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
-            for(Channel userChannel: channels){
-                if(userChannel != liveChannel){
-                    // 发送讲师暂时离开消息给用户
-                    sendMessageService.sendMessage(userChannel,ResultUtil.success(sendMessage));
-                }
-            }*/
-            sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
+            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
+            MyMapPoolUtil.liveChannelMap.remove(socketMsg.getTaskId());
+            //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
             logger.info("leaveLive2"+JSON.toJSONString(socketMsg));
         }
@@ -130,31 +119,19 @@ public class SellerLiveService {
         UserJoinMessageBean sendMessage = null;
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("againJoinLive"+JSON.toJSONString(socketMsg));
-            if(!MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).contains(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()))){
-                MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
-                MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
-            }
-            sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
-            sendMessage.setType(socketMsg.getType());
-            sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
-            /*ChannelGroup channels = MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId());
-            Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
-            for(Channel userChannel: channels){
-                if(userChannel != liveChannel){
-                    // 发送讲师再次进入消息给用户
-                    sendMessageService.sendMessage(userChannel,ResultUtil.success(sendMessage));
-                }
-            }*/
+            MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
+            MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
         }else {
             logger.info("againJoinLive2"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.put(socketMsg.getTaskId(),new DefaultChannelGroup(GlobalEventExecutor.INSTANCE));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
             MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
-            sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
-            sendMessage.setType(socketMsg.getType());
-            sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
         }
-        sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
+        sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
+        sendMessage.setType(socketMsg.getType());
+        sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+        sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
+        //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         return true;
     }
 
