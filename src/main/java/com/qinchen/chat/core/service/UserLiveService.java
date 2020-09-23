@@ -38,7 +38,7 @@ public class UserLiveService {
     public boolean chatJoin(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
         UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
-            logger.info("chatJoin222222");
+            logger.info("chatJoin"+JSON.toJSONString(socketMsg));
             if(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) == null){
                 List<Channel> channels = new ArrayList<>();
                 channels.add(ctx.channel());
@@ -55,6 +55,7 @@ public class UserLiveService {
                 MyMapPoolUtil.totalUserMap.get(socketMsg.getTaskId()).add(userJoin.getUserId());
             }
         }else{
+            logger.info("chatJoin2"+JSON.toJSONString(socketMsg));
             // 累计用户人数
             if(MyMapPoolUtil.totalUserMap.get(socketMsg.getTaskId()) == null){
                 Set set = new HashSet<>();
@@ -100,7 +101,6 @@ public class UserLiveService {
                 return null;
             }
         });
-        logger.info("chatJoin33333");
         return true;
     }
 
@@ -114,7 +114,7 @@ public class UserLiveService {
      */
     public boolean chatQuit(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
-            logger.info("chatQuit22222");
+            logger.info("chatQuit"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
             Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
             UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
@@ -152,8 +152,9 @@ public class UserLiveService {
                     return null;
                 }
             });
+        }else{
+            logger.info("chatQuit2"+JSON.toJSONString(socketMsg));
         }
-        logger.info("chatQuit333333");
         return true;
     }
 
