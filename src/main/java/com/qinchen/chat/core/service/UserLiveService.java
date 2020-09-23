@@ -158,7 +158,6 @@ public class UserLiveService {
         return true;
     }
 
-
     /**
      * 解析用户信息
      * @param userJoin
@@ -180,27 +179,6 @@ public class UserLiveService {
         return report;
     }
 
-    public void testJoin(){
-        // 放入redis中 用户观看信息
-                /*Long userId = userJoin.getUserId();
-                JedisUtil jedisUtil = (JedisUtil) AppContextUtil.getBean("jedisUtil");
-                JedisUtil.Hash mHash = jedisUtil.HASH;
-                String key = RedisConstant.getLiveUserKey(socketMsg.getTaskId());
-                Map<String, String> hgetAll = jedisUtil.HASH.hgetAll(key);
-                ReportLiveUserDetailBean report = null;
-                Map<String, String> userMap = new HashMap<>();
-                if(hgetAll != null){
-                    if(hgetAll.get(userId + "") != null){
-                        report = JSON.parseObject(hgetAll.get(userId + ""), ReportLiveUserDetailBean.class);
-                        report.setStartTime(System.currentTimeMillis());
-                    }
-                }else{
-                    report = new ReportLiveUserDetailBean();
-                    parseLiveUserInfo(report,userJoin,socketMsg.getTaskId());
-                }
-                userMap.put(userId + "",JSON.toJSONString(report));
-                mHash.hmset(key,userMap);*/
-    }
 
 
 }

@@ -107,7 +107,7 @@ public class SendMessageService {
      * 构建弹幕信息
      * @param socketMsg
      */
-    private static LiveChatLogVo parseLiveChatLog(SocketMessageBean socketMsg) {
+    private LiveChatLogVo parseLiveChatLog(SocketMessageBean socketMsg) {
         LiveChatLogVo liveLog = JSON.parseObject(socketMsg.getData(), LiveChatLogVo.class);
         liveLog.setLiveId(socketMsg.getLiveId());
         liveLog.setTaskId(socketMsg.getTaskId());
