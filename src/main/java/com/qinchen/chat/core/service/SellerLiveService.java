@@ -102,6 +102,7 @@ public class SellerLiveService {
             sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()));
             MyMapPoolUtil.liveChannelMap.remove(socketMsg.getTaskId());
+            ctx.channel().close();
             //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
             logger.info("leaveLive2"+JSON.toJSONString(socketMsg));
