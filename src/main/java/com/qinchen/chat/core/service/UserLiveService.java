@@ -39,7 +39,7 @@ public class UserLiveService {
      */
     public boolean chatJoin(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
         UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
-        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
+        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()) == null ? 1 : MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatJoin"+JSON.toJSONString(socketMsg));
             if(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) == null){
@@ -118,8 +118,8 @@ public class UserLiveService {
      * @return
      */
     public boolean chatQuit(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
-        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()) == null ? 0 : MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
             logger.info("chatQuit"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
             UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);

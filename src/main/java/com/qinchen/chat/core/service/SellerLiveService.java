@@ -42,7 +42,7 @@ public class SellerLiveService {
                 MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).addAll(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()));
                 MyMapPoolUtil.userChannelMap.remove(socketMsg.getTaskId());
             }
-            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()).size()+1);
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) == null ? 1 : MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()).size()+1);
             sendMessage.setType(socketMsg.getType());
             sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
@@ -102,7 +102,7 @@ public class SellerLiveService {
             sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
             MyMapPoolUtil.liveChannelMap.remove(socketMsg.getTaskId());
-            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()) == null ? 0 : MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
             ctx.channel().close();
             //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
@@ -119,22 +119,25 @@ public class SellerLiveService {
      * @return
      */
     public boolean againJoinLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
-        UserJoinMessageBean sendMessage = null;
-        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
+        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()) == null ? 1 : MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("againJoinLive"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
             MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
+            UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
+            sendMessage.setType(socketMsg.getType());
+            sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
+            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else {
             logger.info("againJoinLive2"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.put(socketMsg.getTaskId(),new DefaultChannelGroup(GlobalEventExecutor.INSTANCE));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
             MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
+            UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
+            sendMessage.setType(socketMsg.getType());
+            sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
+            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }
-        sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
-        sendMessage.setType(socketMsg.getType());
-        sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
-        sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         return true;
     }
