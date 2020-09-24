@@ -42,18 +42,18 @@ public class SellerLiveService {
                 MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).addAll(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()));
                 MyMapPoolUtil.userChannelMap.remove(socketMsg.getTaskId());
             }
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()).size()+1);
             sendMessage.setType(socketMsg.getType());
-            sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+            sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
             logger.info("chatOpen2"+JSON.toJSONString(socketMsg));
             UserJoinMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
             sendMessage.setType(socketMsg.getType());
-            if(!MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).contains(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()))){
-                sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
-                MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
-                MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
-            }
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),1);
+            sendMessage.setTotalNum(1);
+            MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
+            MyMapPoolUtil.liveChannelMap.put(socketMsg.getTaskId(),ctx.channel());
             sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }
         return true;
@@ -100,8 +100,9 @@ public class SellerLiveService {
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
-            MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()));
+            MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
             MyMapPoolUtil.liveChannelMap.remove(socketMsg.getTaskId());
+            MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
             ctx.channel().close();
             //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         }else{
@@ -119,6 +120,7 @@ public class SellerLiveService {
      */
     public boolean againJoinLive(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg){
         UserJoinMessageBean sendMessage = null;
+        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("againJoinLive"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
@@ -131,7 +133,7 @@ public class SellerLiveService {
         }
         sendMessage = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
         sendMessage.setType(socketMsg.getType());
-        sendMessage.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+        sendMessage.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
         sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         //sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(sendMessage));
         return true;

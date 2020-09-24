@@ -45,12 +45,9 @@ public class ChatAction {
     @RequestMapping("getOnlineUserInfo")
     public ResultUtil getOnlineUserInfo(Long taskId){
         try {
-            ChannelGroup onlineUser = MyMapPoolUtil.chatGroupMap.get(taskId);
             OnlineUserVo vo = new OnlineUserVo();
             vo.setTaskId(taskId);
-            if(onlineUser != null){
-                vo.setTotalUserNum(onlineUser.size());
-            }
+            vo.setTotalUserNum(MyMapPoolUtil.onlineUserMap.get(taskId) == null ? 0 : MyMapPoolUtil.onlineUserMap.get(taskId));
             return ResultUtil.success(vo);
         }catch (Exception e){
             logger.error(" getOnlineUserInfo error"+e.getMessage());
@@ -70,11 +67,11 @@ public class ChatAction {
             Set set = MyMapPoolUtil.totalUserMap.get(taskId);
             ReportLiveVo vo = new ReportLiveVo();
             if(set != null && set.size() > 0){
-                //MyMapPoolUtil.totalUserMap.remove(taskId);
+                MyMapPoolUtil.totalUserMap.remove(taskId);
                 Integer totalChatNum = MyMapPoolUtil.totalChatMap.get(taskId);
                 vo.setTotalUserNum(set.size());
                 vo.setTotalChatNum(totalChatNum);
-                //MyMapPoolUtil.totalChatMap.remove(taskId);
+                MyMapPoolUtil.totalChatMap.remove(taskId);
             }
             return ResultUtil.success(vo);
         }catch (Exception e){
@@ -94,7 +91,7 @@ public class ChatAction {
         try {
             Map<Long, Integer> totalChat = MyMapPoolUtil.totalContentNumMap.get(taskId);
             if(totalChat != null){
-                //MyMapPoolUtil.totalContentNumMap.remove(taskId);
+                MyMapPoolUtil.totalContentNumMap.remove(taskId);
                 return ResultUtil.success(totalChat);
             }
             return ResultUtil.success(new HashMap<Long,Integer>());

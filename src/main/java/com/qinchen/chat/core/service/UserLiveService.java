@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.xml.transform.Result;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -37,6 +39,7 @@ public class UserLiveService {
      */
     public boolean chatJoin(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
         UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
+        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())+1);
         if(!sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatJoin"+JSON.toJSONString(socketMsg));
             if(MyMapPoolUtil.userChannelMap.get(socketMsg.getTaskId()) == null){
@@ -65,12 +68,12 @@ public class UserLiveService {
                 MyMapPoolUtil.totalUserMap.get(socketMsg.getTaskId()).add(userJoin.getUserId());
             }
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).add(ctx.channel());
-            Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
-            userJoin.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+            userJoin.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             userJoin.setType(socketMsg.getType());
+            //Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
             // 发送给主播
-            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(userJoin));
-            userJoin.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+            /*sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(userJoin));
+            userJoin.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             userJoin.setType(socketMsg.getType());
             ChannelGroup channels = MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId());
             for(Channel userChannel: channels){
@@ -78,7 +81,9 @@ public class UserLiveService {
                     // 发送给用户
                     sendMessageService.sendMessage(userChannel,ResultUtil.success(userJoin));
                 }
-            }
+            }*/
+            // 消息
+            sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()),ResultUtil.success(userJoin));
         }
         connPool.submit(new Callable<Object>() {
             @Override
@@ -97,7 +102,7 @@ public class UserLiveService {
                     parseLiveUserInfo(report,userJoin,socketMsg.getTaskId(),socketMsg.getShopId(),socketMsg.getLiveId());
                 }
                 mHash.hset(key,userId + "", JSON.toJSONString(report));
-                jedisUtil.expire(key,new Random().nextInt(600)+1000*3600*12);
+                jedisUtil.expire(key,new Random().nextInt(600)+1000*3600*8);
                 return null;
             }
         });
@@ -113,24 +118,27 @@ public class UserLiveService {
      * @return
      */
     public boolean chatQuit(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
+        MyMapPoolUtil.onlineUserMap.put(socketMsg.getTaskId(),MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId())-1);
         if(sendMessageService.isExistChatGroup(socketMsg.getTaskId())){
             logger.info("chatQuit"+JSON.toJSONString(socketMsg));
             MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());
-            Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
             UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
-            userJoin.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+            userJoin.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             userJoin.setType(socketMsg.getType());
-            for(Channel userChannel: MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId())){
+            //Channel liveChannel = MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId());
+            /*for(Channel userChannel: MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId())){
                 if(userChannel != liveChannel){
                     // 发送给用户
                     sendMessageService.sendMessage(userChannel,ResultUtil.success(userJoin));
                 }
             }
             // 累计用户人数
-            userJoin.setTotalNum(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).size());
+            userJoin.setTotalNum(MyMapPoolUtil.onlineUserMap.get(socketMsg.getTaskId()));
             userJoin.setType(socketMsg.getType());
             // 发送给主播
-            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(userJoin));
+            sendMessageService.sendMessage(MyMapPoolUtil.liveChannelMap.get(socketMsg.getTaskId()),ResultUtil.success(userJoin));*/
+            // 群发
+            sendMessageService.sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()), ResultUtil.success(userJoin));
             connPool.submit(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
@@ -144,7 +152,7 @@ public class UserLiveService {
                         report.setTotalViewNum(report.getTotalViewNum() + nowCurrent - report.getStartTime());
                         report.setEndTime(nowCurrent);
                         mHash.hset(key,userId+"",JSON.toJSONString(report));
-                        jedisUtil.expire(key,new Random().nextInt(600)+1000*3600*24);
+                        jedisUtil.expire(key,new Random().nextInt(600)+1000*3600*8);
                     }
                     MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel());
                     MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()).remove(ctx.channel());

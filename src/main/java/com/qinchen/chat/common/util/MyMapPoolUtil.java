@@ -36,6 +36,11 @@ public class MyMapPoolUtil {
     public static ConcurrentMap<Long, Integer> totalChatMap = new ConcurrentHashMap();
 
     /**
+     * 实时在线人数
+     */
+    public static ConcurrentMap<Long, Integer> onlineUserMap = new ConcurrentHashMap();
+
+    /**
      * 保存用户聊天内容
      */
     public static ConcurrentMap<Long, List<LiveChatLogVo>> totalContentMap = new ConcurrentHashMap();
