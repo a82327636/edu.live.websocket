@@ -29,7 +29,7 @@ public class ExceptionCaughtHandler extends ChannelInboundHandlerAdapter {
         try {
             if(cause instanceof Exception){
                 // 关闭通道
-                String taskAndUser = MyMapPoolUtil.channelTaskAndUserMap.get(ctx.channel());
+                String taskAndUser = MyMapPoolUtil.channelTaskAndUserMap.get(ctx.channel().id().asShortText());
                 if(StringUtils.isNotBlank(taskAndUser)){
                     String[] split = taskAndUser.split("_");
                     if(split.length == 2){
@@ -54,7 +54,7 @@ public class ExceptionCaughtHandler extends ChannelInboundHandlerAdapter {
                             }
                         });
                     }
-                    MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel());
+                    MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel().id().asShortText());
                 }
                 ctx.channel().close();
             }

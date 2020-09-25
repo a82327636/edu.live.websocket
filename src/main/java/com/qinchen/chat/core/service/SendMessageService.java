@@ -36,6 +36,7 @@ public class SendMessageService {
             sendMessage.setType(socketMsg.getType());
             // 给所有人发送消息
             sendGroupMessage(MyMapPoolUtil.chatGroupMap.get(socketMsg.getTaskId()), ResultUtil.success(sendMessage));
+            logger.info("response sendMsg"+JSON.toJSONString(sendMessage));
             connPool.submit(new Callable<Object>() {
                 @Override
                 public Object call() throws Exception {
@@ -47,14 +48,16 @@ public class SendMessageService {
                     }
                     UserJoinMessageBean userJoin = JSON.parseObject(socketMsg.getData(), UserJoinMessageBean.class);
                     // 用户在某个直播间互动次数
-                    if(MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()) == null){
-                        Map<Long,Integer> map = new HashMap<>();
-                        map.put(userJoin.getUserId(),1);
-                        MyMapPoolUtil.totalContentNumMap.put(socketMsg.getTaskId(),map);
-                    }else{
-                        Map<Long, Integer> map = MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId());
-                        map.put(userJoin.getUserId(),MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()).get(userJoin.getUserId()) == null ? 1 : MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()).get(userJoin.getUserId()) + 1);
-                        MyMapPoolUtil.totalContentNumMap.put(socketMsg.getTaskId(),map);
+                    if(userJoin.getType() == ReqMsgTypeEnum.USER_SEND_MSG.getCode()){
+                        if(MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()) == null){
+                            Map<Long,Integer> map = new HashMap<>();
+                            map.put(userJoin.getUserId(),1);
+                            MyMapPoolUtil.totalContentNumMap.put(socketMsg.getTaskId(),map);
+                        }else{
+                            Map<Long, Integer> map = MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId());
+                            map.put(userJoin.getUserId(),MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()).get(userJoin.getUserId()) == null ? 1 : MyMapPoolUtil.totalContentNumMap.get(socketMsg.getTaskId()).get(userJoin.getUserId()) + 1);
+                            MyMapPoolUtil.totalContentNumMap.put(socketMsg.getTaskId(),map);
+                        }
                     }
                     // 保存聊天内容
                     if(MyMapPoolUtil.totalContentMap.get(socketMsg.getTaskId()) == null){

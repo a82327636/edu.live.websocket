@@ -5,7 +5,6 @@ import com.qinchen.chat.core.vo.LiveChatLogVo;
 import com.qinchen.chat.common.util.MyMapPoolUtil;
 import com.qinchen.chat.core.vo.OnlineUserVo;
 import com.qinchen.chat.core.vo.ReportLiveVo;
-import io.netty.channel.group.ChannelGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +46,7 @@ public class ChatAction {
         try {
             OnlineUserVo vo = new OnlineUserVo();
             vo.setTaskId(taskId);
-            vo.setTotalUserNum(MyMapPoolUtil.onlineUserMap.get(taskId) == null ? 0 : MyMapPoolUtil.onlineUserMap.get(taskId));
+            vo.setTotalUserNum(MyMapPoolUtil.onlineUserSetMap.get(taskId) == null ? 0 : MyMapPoolUtil.onlineUserSetMap.get(taskId).size());
             return ResultUtil.success(vo);
         }catch (Exception e){
             logger.error(" getOnlineUserInfo error"+e.getMessage());
@@ -101,6 +100,7 @@ public class ChatAction {
             return ResultUtil.error(0,e.getMessage());
         }
     }
+
 
 
 

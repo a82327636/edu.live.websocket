@@ -53,9 +53,10 @@ public class MyNioWebSocketHandler extends SimpleChannelInboundHandler<TextWebSo
             if (evt instanceof IdleStateEvent) {
                 IdleStateEvent idleStateEvent = (IdleStateEvent) evt;
                 if (idleStateEvent.state() == IdleState.ALL_IDLE) {
-                    log.info("长时间没有发送心跳，清理账号:" +IdleState.ALL_IDLE);
                     // 关闭通道
-                    String taskAndUser = MyMapPoolUtil.channelTaskAndUserMap.get(ctx.channel());
+                    log.info("channel:" +ctx.channel().id().asShortText());
+                    String taskAndUser = MyMapPoolUtil.channelTaskAndUserMap.get(ctx.channel().id().asShortText());
+                    log.info("长时间没有发送心跳，清理账号:" +taskAndUser);
                     if(StringUtils.isNotBlank(taskAndUser)){
                         String[] split = taskAndUser.split("_");
                         if(split.length == 2){
@@ -63,6 +64,10 @@ public class MyNioWebSocketHandler extends SimpleChannelInboundHandler<TextWebSo
                                 @Override
                                 public Object call() throws Exception {
                                     String userId = split[1];
+                                    // 减掉在线人数
+                                    if(MyMapPoolUtil.onlineUserSetMap.get(Long.valueOf(split[0])).contains(Long.valueOf(userId))){
+                                        MyMapPoolUtil.onlineUserSetMap.get(Long.valueOf(split[0])).remove(Long.valueOf(userId));
+                                    }
                                     JedisUtil jedisUtil = (JedisUtil) AppContextUtil.getBean("jedisUtil");
                                     JedisUtil.Hash mHash = jedisUtil.HASH;
                                     String key = RedisConstant.getLiveUserKey(Long.valueOf(split[0]));
@@ -80,7 +85,7 @@ public class MyNioWebSocketHandler extends SimpleChannelInboundHandler<TextWebSo
                                 }
                             });
                         }
-                        MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel());
+                        MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel().id().asShortText());
                     }
                     ctx.channel().close();
                 }

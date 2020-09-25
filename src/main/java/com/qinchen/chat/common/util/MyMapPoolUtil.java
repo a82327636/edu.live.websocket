@@ -29,16 +29,15 @@ public class MyMapPoolUtil {
      * 用来存储累计某直播间用户人数
      */
     public static ConcurrentMap<Long, Set> totalUserMap = new ConcurrentHashMap();
+    /**
+     * 保存用户实时在线任务set
+     */
+    public static ConcurrentMap<Long, Set> onlineUserSetMap = new ConcurrentHashMap();
 
     /**
      * 用来存储各个直播间总互动次数
      */
     public static ConcurrentMap<Long, Integer> totalChatMap = new ConcurrentHashMap();
-
-    /**
-     * 实时在线人数
-     */
-    public static ConcurrentMap<Long, Integer> onlineUserMap = new ConcurrentHashMap();
 
     /**
      * 保存用户聊天内容
@@ -53,7 +52,7 @@ public class MyMapPoolUtil {
     /**
      * 保存任务和用户map
      */
-    public static ConcurrentMap<Channel, String> channelTaskAndUserMap = new ConcurrentHashMap();
+    public static ConcurrentMap<String, String> channelTaskAndUserMap = new ConcurrentHashMap();
 
 
 
