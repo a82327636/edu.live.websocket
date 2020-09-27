@@ -31,7 +31,6 @@ public class SendMessageService {
      */
     public boolean sendMsg(ChannelHandlerContext ctx, TextWebSocketFrame msg, SocketMessageBean socketMsg, EventExecutorGroup connPool){
         if(isExistChatGroup(socketMsg.getTaskId())){
-            logger.info("sendMsg"+JSON.toJSONString(socketMsg));
             SendMessageBean sendMessage = JSON.parseObject(socketMsg.getData(), SendMessageBean.class);
             sendMessage.setType(socketMsg.getType());
             // 给所有人发送消息
