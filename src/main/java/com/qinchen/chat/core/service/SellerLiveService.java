@@ -78,7 +78,7 @@ public class SellerLiveService {
                     MyMapPoolUtil.chatGroupMap.remove(socketMsg.getTaskId());
                     //MyMapPoolUtil.channelTaskAndUserMap.remove(ctx.channel());
                 }
-            },15, TimeUnit.SECONDS);
+            },5, TimeUnit.SECONDS);
         }else {
             logger.info("chatClose2"+JSON.toJSONString(socketMsg));
         }
